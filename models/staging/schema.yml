@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: staging
+    database: model-caldron-411807
+    schema: ny
+
+    tables:
+      - name: green_tripdata
+      - name: yellow_tripdata
+      
+

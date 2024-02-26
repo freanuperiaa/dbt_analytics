@@ -1,12 +1,6 @@
 {{ config(materialized='view') }}
  
-with tripdata as 
-(
-  select *,
-    row_number() over(partition by dispatching_base_num, pickup_datetime) as rn
-  from {{ source('staging','fhv_tripdata') }}
-  where dispatching_base_num is not null 
-)
+
 select
    -- identifiers
     {{ dbt_utils.generate_surrogate_key(['dispatching_base_num', 'pickup_datetime']) }} as fhv_id,    
@@ -20,10 +14,10 @@ select
     cast(pickup_datetime as timestamp) as pickup_datetime,
     cast(dropoff_datetime as timestamp) as dropoff_datetime,
 
-from tripdata
-where rn = 1
+from {{ source('staging','fhv_tripdata') }}
+where extract(year from pickup_datetime) = 2019
 
--- dbt build --select <model.sql> --vars '{'is_test_run: false}'
+-- dbt build --select <model.sql> --vars '{'is_test_run': 'false'}'
 {% if var('is_test_run', default=true) %}
 
   limit 100
